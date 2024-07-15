@@ -1,0 +1,70 @@
+{% load static %}
+
+<div class="h-full min-[1280px]:w-[220px] flex flex-col justify-between fixed p-4">
+
+    <div class="nav-links flex flex-col gap-y-4" hx-target="#content" hx-swap="outerHTML" hx-boost="true">
+
+        <a 
+        class="rounded-full nav-link cursor-pointer max-xl:w-12 ps-1" 
+        href="{% url "home" %}"
+        _="on click go to the top of the body"
+        >
+            <img class="nav-logo w-9 h-9" src="{% static "images/sizes/icon.png" %}" alt="Waves">
+            <span class="text-2xl ps-3 font-bold">Waves</span>
+        </a>
+
+        {% for tab in tabs %}
+        
+        <a 
+            class="rounded-full nav-link hover:bg-base-300 cursor-pointer max-xl:w-12" 
+            href="{% url tab.name %}"
+        >
+            <div class="tab-icon">
+                {% if tab.name == "notifications" %}
+                <span class="absolute flex h-2 w-2 hidden notification-indicator" {% if notifications %} _="init remove .hidden from me" {% endif %}>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-75"></span>
+                    <span class="absolute inline-flex rounded-full h-2 w-2 bg-info"></span>
+                </span>
+                {% endif %}
+                <i class="bx bx-md {% if page_title == tab.name %} bxs-{{ tab.icon }} {% else %} bx-{{ tab.icon }} {% endif %} {{ tab.name }}-link"></i>
+            </div>
+            <span class="m-0 p-0 text-lg max-xl:hidden ps-3 {% if page_title == tab.name %} font-bold {% endif %}" id="{{tab.name}}-link-text">{{ tab.name.title }}</span>
+        </a>
+        
+        {% endfor %}
+
+        <a 
+            class="rounded-full nav-link hover:bg-base-300 cursor-pointer max-xl:w-12" 
+            href="{% url "profile" username=request.user.username %}"
+        >
+            <div class="tab-icon">
+                <i class="bx bx-md {% if request.user == user and request.user|lower in page_title|lower %} bxs-user-pin {% else %} bx-user-pin {% endif %} profile-link"></i>
+            </div>
+            <span class="m-0 p-0 text-lg max-xl:hidden ps-3 {% if request.user == user and request.user|lower in page_title|lower %} font-bold {% endif %}" id="profile-link-text">Profile</span>
+        </a>
+
+        <button class="hidden max-xl:block bg-info hover:bg-info/80 btn rounded-full w-12 h-12 p-0" onclick="modal_compose.showModal()"><i class="bx bx-edit-alt text-2xl text-info-content"></i></button>
+        <button class="block max-xl:hidden bg-info hover:bg-info/80 btn rounded-full text-info-content text-base" onclick="modal_compose.showModal()">Post</button>
+
+        {% include "posts/post_form_modal.html" with placeholder="What is happening?" modal_type="compose" textarea_id="compose_post" media_id="media_post" %}
+
+    </div>
+        
+    {% if request.user.is_authenticated %}
+
+    <div class="dropdown dropdown-top">
+        <div tabindex="0" role="button" class="bg-inherit border-none flex">
+            <img src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}" class="rounded-full w-8 h-8 max-xl:m-auto">
+            <span class="m-0 ps-2 text-2xl max-xl:hidden ps-3">{{ request.user.username }}</span>
+        </div>
+        <div tabindex="0" class="dropdown-content z-[1] menu mb-3 p-2 shadow shadow-slate-500/50 bg-base-100 rounded-box w-52">
+            {% if request.user.is_superuser %}
+            <li><a class="dropdown-item" href="/admin/">Administration<i class="bx bx-shield text-lg"></i></a></li>
+            {% endif %}
+            <li><a class="dropdown-item" href="{% url "logout" %}">Log Out<i class="bx bx-log-out text-lg"></i></a></li>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>

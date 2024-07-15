@@ -1,0 +1,18 @@
+{% for notification in notifications %}
+{% if not notification.is_read %}
+    <span 
+    hx-post="{% url "notifications" %}" 
+    hx-trigger="revealed" 
+    hx-vals='{"id":"{{notification.id}}"}' 
+    ></span>
+{% endif %}
+<article
+class="border-slate-500 border-b-2 border-opacity-50"
+hx-target="#content" 
+hx-swap="outerHTML" 
+hx-push-url="true"
+hx-get="{{ notification.post_creator.get_absolute_url }}"
+>
+    {% include "posts/post.html" with post=notification.post_creator %}
+</article>
+{% endfor %}

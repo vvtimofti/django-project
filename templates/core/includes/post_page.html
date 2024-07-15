@@ -1,0 +1,41 @@
+{% if first_page %}
+<div 
+    class="{% if comment_section %} comment-section {% else %} post-section {% endif %}" 
+    id="post-section"
+>
+{% endif %}
+
+    {% for post in posts %}
+        <article
+        class="border-slate-500 border-b-2 border-opacity-50 opacity-0"
+        hx-target="#content" 
+        hx-swap="outerHTML" 
+        hx-push-url="true"
+        hx-get="{{ post.get_absolute_url }}"
+        _="
+        on intersection(intersecting) having threshold 0
+            if intersecting transition opacity to 1
+        "
+        >
+            {% include "posts/post.html" with reply=reply %}
+        </article>
+        {% if forloop.last and posts.has_next %}
+        <span
+        hx-get="?page={{ posts.next_page_number }}" 
+        hx-target="#post-section" 
+        hx-trigger="revealed"
+        hx-swap="beforeend"
+        _="
+        on htmx:afterRequest
+            remove #spinner_{{ post.pk }}
+            remove me
+        "></span>
+        <div class="w-full flex justify-center" id="spinner_{{ post.pk }}">
+            <span class="loading loading-spinner loading-sm text-accent mt-4"></span>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+{% if first_page %}
+</div>
+{% endif %}

@@ -1,0 +1,17 @@
+<div
+hx-post="{% url 'toggle_bookmark' username=post.user.username post_key=post.post_key %}"
+id="bookmark_{{ post.post_key }}"
+hx-target="#bookmark_{{ post.post_key }}"
+hx-swap="outerHTML"
+hx-trigger="click consume"
+title="Bookmark"
+>
+    {% if request.user in post.bookmarks.all %}
+        <i class="bx bxs-bookmark bookmark p-1 max-sm:p-0"></i>
+    {% else %}
+        <i class="bx bx-bookmark bookmark p-1 max-sm:p-0"></i>
+    {% endif %}
+    <label for="bookmark_{{ post.post_key }}" class="align-text-bottom">
+        {{ post.bookmarks.count }}
+    </label>
+</div>

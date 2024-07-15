@@ -1,0 +1,99 @@
+<main 
+id="content" 
+class="max-[689px]:basis-full"
+>
+    <div 
+    role="alert" 
+    id="flash-messages" 
+    class="fixed bottom-8 left-[50%] z-[100] items-center max-sm:w-full"
+    >
+        {% if messages %}
+            <ul class="messages" id="notification-dropdown">
+                {% for message in messages %}
+                    <li 
+                    {% if message.tags %} 
+                    class="alert alert-success flex justify-between" 
+                    id="flash-message" 
+                    _="on load wait 3s remove me"
+                    {% endif %}>
+                        <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        class="stroke-current shrink-0 h-6 w-6" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                        >
+                            <path 
+                            stroke-linecap="round" 
+                            stroke-linejoin="round" 
+                            stroke-width="2" 
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                            />
+                        </svg>
+                        <span class="text-sm">{{ message }}</span>
+                        <button 
+                        class="btn btn-sm btn-ghost" 
+                        _="on click add .hidden to the closest parent <li/>"
+                        >Close</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div id="notify"></div>
+
+    <div 
+    class="
+        content 
+        min-[690px]:w-[600px] 
+        min-h-screen 
+        border-slate-500 
+        border-x-2 
+        max-sm:border-none 
+        border-opacity-50 
+        relative 
+        pb-52
+    ">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if request.htmx %}
+    <script>
+        document.title = "{{ page_title|title }} / DEV"
+
+        if (typeof tabsString === "undefined") {
+            const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+        
+            const tabsString = "{{ tabs|escapejs }}";
+            const tabsArray = JSON.parse(tabsString.replace(/'/g, '"'));
+        
+            tabsArray.forEach((tab) => {
+                const tabIcon = document.querySelectorAll(`.${tab.name}-link`);
+                const tabName = document.getElementById(`${tab.name}-link-text`);
+                const capitalizedTabName = capitalize(tab.name);
+        
+                const isActive = document.title.includes(capitalizedTabName);
+                const iconClass = isActive ? `bxs-${tab.icon}` : `bx-${tab.icon}`;
+                const fontWeightClass = isActive ? 'font-bold' : '';
+
+                tabIcon.forEach((t) => {
+                  t.classList.remove(`bxs-${tab.icon}`, `bx-${tab.icon}`);
+                  t.classList.add(iconClass);
+                });
+                tabName.classList.toggle('font-bold', isActive);
+            });
+        
+            const profileIcon = document.querySelectorAll(".profile-link");
+            const profileName = document.getElementById("profile-link-text");
+            const isProfileActive = document.title.includes("{{ request.user|title }}");
+        
+            profileIcon.forEach((p) => {
+                p.classList.remove('bxs-user-pin', 'bx-user-pin');
+                p.classList.add(isProfileActive ? 'bxs-user-pin' : 'bx-user-pin');
+            });
+            profileName.classList.toggle('font-bold', isProfileActive);
+        }
+        
+    </script>
+    {% endif %}
+</main>

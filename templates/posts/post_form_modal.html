@@ -1,0 +1,178 @@
+{% load widget_tweaks %}
+{% load static %}
+
+<dialog id="modal_{{ modal_type }}" class="modal modal-bottom sm:modal-middle cursor-default bg-base-100/25" hx-trigger="click consume">
+    <div class="modal-box">
+        {% if reply %}
+        <span class="opacity-50">Replying to</span>
+        <div class="flex py-4 gap-x-4">
+            <img src="{{ post.user.profile.profile_picture.url }}" alt="{{ post.user.username }}" class="rounded-full w-8 h-8">
+            <div>
+                {{ post.post_content }}
+            </div>
+        </div>
+        {% endif %}
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 focus:outline-none" onclick="closeModal(this);">✕</button>
+        <form 
+            method="dialog"
+            enctype="multipart/form-data"
+            {% if reply %}
+                hx-post="{% url "post_create" username=post.user.username post_key=post.post_key %}"
+            {% else %}
+                hx-post="{% url "post_create" %}"
+            {% endif %}
+            hx-push-url="true"
+            hx-target="#content"
+            onsubmit="closeModal(this);"
+            hx-on::after-request="resetForm(this, document.getElementById('{{ media_id }}'), document.getElementById('image-preview-{{ modal_type }}'));"
+            class="flex flex-col mt-6"
+        >
+            <label class="textarea textarea-bordered flex items-center gap-2">
+                <img src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}" class="rounded-full w-8 align-top mt-2 mb-auto">
+                {% render_field post_form.post_content placeholder=placeholder id=textarea_id class="bg-inherit resize-none textarea h-[150px] w-full focus:border-none focus:outline-none" %}
+            </label>
+            <div class="w-full flex justify-between pt-2">
+                <span>
+                    <label for="{{ media_id }}" id="setUpPreview_{{ modal_type }}" class="bx-tool rounded-full flex justify-center p-1  w-8 h-8">
+                        <i class="bx bx-image-alt m-auto"></i>
+                    </label>
+                </span>
+                {% render_field post_form.media class="hidden" id=media_id accept="image/*,video/*" %}
+                <button
+                    class="btn btn-sm btn-info px-3"
+                    type="submit"
+                >Post</button>
+            </div>
+        </form>
+        <div class="pt-2">
+            <div id="image-preview-{{ modal_type }}" class="relative"></div>
+        </div>
+    </div>
+</dialog>
+
+<script>
+
+    function closeModal(form) {
+        var modalId = form.closest('dialog').id;
+        var modal = document.getElementById(modalId);
+        modal.close();
+    }
+
+    function resetForm(form, fileMedia, previewContainer) {
+        form.reset();
+        clearPreviewContainerModal(fileMedia, previewContainer);
+    }
+    
+    function clearPreviewContainerModal(fileMediaModal, previewContainerModal) {
+        fileMediaModal.value = "";
+        previewContainerModal.innerHTML = "";
+    }
+
+    if (typeof isImagePreviewSetupModal === "undefined") {
+        let isImagePreviewSetupModal = false;
+
+        function setUpImagePreviewModal() {
+            console.log("set up image preview");
+
+            if (isImagePreviewSetupModal) {
+                return;
+            }
+
+            document
+                .getElementById("{{ media_id }}")
+                .addEventListener("change", function (event) {
+                    console.log("preview");
+                    const previewContainerModal =
+                        document.getElementById("image-preview-{{ modal_type }}");
+                    const fileMediaModal = document.getElementById("{{ media_id }}");
+                    const fileInputModal = event.target;
+                    const files = fileInputModal.files;
+
+                    previewContainerModal.innerHTML = "";
+
+                    if (!(files[0].type.startsWith("image/") || files[0].type.startsWith("video/"))) {
+                        if (files.length === 0) return;
+
+                        previewContainerModal.innerHTML = `<p class='text-red-500'><i class="bx bx-block text-red-500"></i> ${
+                            files[0].name.split(".")[files[0].name.split(".").length - 1]
+                        } extension is not allowed</p>`;
+                        fileMediaModal.value = "";
+
+                        setTimeout(function () {
+                            const errorMessageModal = previewContainerModal.firstChild;
+
+                            if (errorMessageModal) {
+                                errorMessageModal.style.transition = "opacity 0.5s";
+                                errorMessageModal.style.opacity = "0";
+
+                                setTimeout(function () {
+                                    previewContainerModal.innerHTML = "";
+                                }, 500);
+                            }
+                        }, 3000);
+                        return;
+                    }
+
+                    const readerModal = new FileReader();
+
+                    readerModal.onload = function (e) {
+                        const closeContainerModal = document.createElement("div");
+                        closeContainerModal.classList.add(
+                            "rounded-full",
+                            "absolute",
+                            "top-1.5",
+                            "right-1.5",
+                            "h-fit",
+                            "w-fit",
+                            "p-0",
+                            "bg-base-300/75",
+                            "cursor-pointer",
+                        );
+                        var mediaElementModal;
+                        if (files[0].type.startsWith("video/")) {
+                            mediaElementModal = document.createElement("video");
+                            mediaElementModal.classList.add("rounded-xl", "mb-4");
+                            mediaElementModal.src = e.target.result;
+                            mediaElementModal.controls = "true";
+                        } else {
+                            mediaElementModal = document.createElement("img");
+                            mediaElementModal.src = e.target.result;
+                            mediaElementModal.classList.add("rounded-xl", "w-full");
+                        }
+
+                        const closeBtnElementModal = document.createElement("i");
+                        closeBtnElementModal.classList.add(
+                            "bx",
+                            "bx-x",
+                            "p-1",
+                            "bg-transparent",
+                            "rounded-full",
+                            "hover:bg-base-300/95",
+                        );
+                        closeBtnElementModal.id = "image-preview-{{ modal_type }}-close";
+
+                        closeContainerModal.appendChild(closeBtnElementModal);
+                        previewContainerModal.appendChild(closeContainerModal);
+                        previewContainerModal.appendChild(mediaElementModal);
+
+                        document
+                            .getElementById("image-preview-{{ modal_type }}-close")
+                            .addEventListener("click", function () {
+                                console.log("close");
+                                clearPreviewContainerModal(fileMediaModal, previewContainerModal);
+                            });
+                    };
+
+                    readerModal.readAsDataURL(files[0]);
+                });
+            isImagePreviewSetupModal = true;
+        }
+    }
+
+    if (document.getElementById("setUpPreview_{{ modal_type }}")) {
+        document
+            .getElementById("setUpPreview_{{ modal_type }}")
+            .addEventListener("click", setUpImagePreviewModal);
+    }
+    
+</script>

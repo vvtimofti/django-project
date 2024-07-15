@@ -1,0 +1,17 @@
+<div
+hx-post="{% url "toggle_repost" username=post.user.username post_key=post.post_key %}"
+id="repost{{ post.post_key }}"
+hx-target="#repost{{ post.post_key }}"
+hx-swap="outerHTML"
+hx-trigger="click consume"
+title="Repost"
+>
+    {% if request.user in post.reposted_by.all %}
+        <i class="bx bx-repost repost p-1 max-sm:p-0"></i>
+    {% else %}
+        <i class="bx bx-repost p-1 max-sm:p-0"></i>
+    {% endif %}
+    <label for="repost{{ post.post_key }}" class="align-text-bottom">
+        {{ post.reposted_by.count }}
+    </label>
+</div>

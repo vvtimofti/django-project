@@ -1,0 +1,17 @@
+<div
+hx-post="{% url 'like_post' username=post.user.username post_key=post.post_key %}"
+id="like_{{ post.post_key }}"
+hx-target="#like_{{ post.post_key }}"
+hx-swap="outerHTML"
+hx-trigger="click consume"
+title="Like"
+>
+    {% if request.user in post.likes.all %}
+        <i class="bx bxs-heart text-red-500 animate__animated heart p-1 max-sm:p-0" ></i>
+    {% else %}
+        <i class="bx bx-heart animate__animated heart p-1 max-sm:p-0" ></i>
+    {% endif %}
+    <label for="like_{{ post.post_key }}" class="align-text-bottom">
+        {{ post.likes.count }}
+    </label>
+</div>

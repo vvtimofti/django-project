@@ -1,0 +1,15 @@
+{% if deletion %}
+    <div id="chat_messages" hx-swap-oob="beforeend"> 
+        <span _="init remove #message_{{ message.id }}"></span>
+    </div>
+{% else %}
+    <div id="chat_messages" hx-swap-oob="beforeend"> 
+
+        <div class="hover:bg-base-200 relative px-4">
+            {% include "chat/chat_message.html" with room_name=chat_room.room_name %}
+        </div>
+
+        <script>scrollToBottom()</script>
+        
+    </div>
+{% endif %}

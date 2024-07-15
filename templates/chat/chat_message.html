@@ -1,0 +1,66 @@
+{% load custom_filters %}
+
+<wrapper
+id="message_{{ message.id }}"
+>
+
+    {% if message.sender == user %}
+    <div 
+    class="chat chat-start relative" 
+    _=" 
+        on mouseenter 
+            remove .hidden from #tools_{{ message.id }} 
+        on mouseleave 
+            add .hidden to #tools_{{ message.id }}
+    ">
+        <div 
+        class="chat-image avatar cursor-pointer" 
+        hx-get="{% url "profile" username=message.sender.username %}" 
+        hx-target="#content"
+        hx-push-url="true"
+        >
+            <div class="w-10 rounded-full">
+                <img alt="{{ message.sender }}" src="{{ message.sender.profile.profile_picture.url }}" />
+            </div>
+        </div>
+        <div class="chat-header">
+            {{ message.sender.profile.display_name }}
+            <time class="text-xs opacity-50">{{ message.created|custom_naturaltime }} ago</time>
+        </div>
+        <div class="chat-bubble bio max-w-[400px]">{{ message.body }}</div>
+        <div class="dropdown absolute w-full flex justify-end hidden" id="tools_{{ message.id }}">
+            <div tabindex="0" role="button" class="btn btn-xs btn-circle btn-ghost">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                    <path d="M3 10a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM8.5 10a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM15.5 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                </svg>                  
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1000] menu p-0 shadow shadow-slate-500/50 bg-base-100 rounded-box w-fit">
+                <li
+                id="hello_{{ message.id }}"
+                hx-delete="{% url "chat_room" room_name=room_name %}"
+                hx-vals='{"id": "{{ message.id }}"}'
+                ><a>Delete</a></li>
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="chat chat-end">
+        <div 
+        class="chat-image avatar cursor-pointer" 
+        hx-get="{% url "profile" username=message.sender.username %}" 
+        hx-target="#content"
+        hx-push-url="true"
+        >
+            <div class="w-10 rounded-full">
+                <img alt="{{ message.sender }}" src="{{ message.sender.profile.profile_picture.url }}" />
+            </div>
+        </div>
+        <div class="chat-header">
+            {{ message.sender.profile.display_name }}
+            <time class="text-xs opacity-50">{{ message.created|custom_naturaltime }} ago</time>
+        </div>
+        <div class="chat-bubble bio max-w-[400px]">{{ message.body }}</div>
+    </div>
+    {% endif %}
+
+</wrapper>

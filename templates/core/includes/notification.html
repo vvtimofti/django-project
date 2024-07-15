@@ -1,0 +1,29 @@
+{% if instance.parent_post.user == user %}
+<div id="notify" _="init remove .hidden from .notification-indicator"></div>
+<div id="alert-new" class="w-full flex justify-center absolute sticky top-4">
+    <button 
+    class="btn btn-xs btn-info text-info-content no-animation"
+    hx-get="{% url "fetch_notifications" %}"
+    hx-target="#notifications"
+    hx-swap="afterbegin"
+    _="on click add .hidden to .notification-indicator remove me"
+    >
+        New replies available
+    </button>
+</div>
+{% endif %}
+
+{% if feed and user != instance.user %}
+<div id="feed-update" class="w-full flex justify-center absolute sticky top-4 z-[1000]">
+    <button 
+    id="feed-update-btn"
+    class="btn btn-xs btn-info text-info-content no-animation"
+    hx-get="{% url "home" %}"
+    hx-target="#content"
+    hx-swap="outerHTML"
+    >
+        <span id="reply-spinner" class="htmx-indicator hidden loading loading-spinner loading-xs"></span>
+        New posts available
+    </button>
+</div>
+{% endif %}

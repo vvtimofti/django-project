@@ -1,0 +1,135 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        <title>{{ page_title|title }} / DEV</title>
+
+        <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.4/css/boxicons.min.css">
+        <link rel="stylesheet" href="{% static "css/styles.css" %}">
+        <link rel="stylesheet" type="text/css" href="{% static "css/main.min.css" %}">
+
+        <script src="{% static "js/htmx/htmx.min.js" %}"></script>
+        <script src="{% static "js/htmx/_hyperscript.min.js" %}"></script>
+        <script src="{% static "js/htmx/ws.js" %}"></script>
+        <script src="{% static "js/script.js" %}"></script>
+
+    </head>
+    <body 
+        data-theme="{% if request.session.theme %}{{ request.session.theme }}{% else %}nord{% endif %}" 
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+
+        <div class="h-full">
+        
+            {% if user.is_authenticated %}
+            
+                <div 
+                class="xl:container mx-auto flex"
+                >
+                    
+                    <nav 
+                    class="basis-1/3 min-w-[80px] flex justify-end z-[100] max-sm:hidden"
+                    hx-ext="ws"
+                    ws-connect="/ws/notifications/"
+                    >
+                        {% include "core/includes/navigation.html" %}
+                    </nav>
+                    <nav class="hidden max-sm:block bottom-0 fixed z-[100] w-full backdrop-blur-md bg-base-100/90 py-2">
+                        <div class="flex justify-evenly items-center" hx-target="#content" hx-swap="outerHTML">
+                            {% for tab in tabs %}
+                                
+                            <a class="rounded-full nav-link cursor-pointer" hx-get="{% url tab.name %}" hx-push-url="true">
+                                <div class="tab-icon">
+                                    {% if tab.name == "notifications" %}
+                                    <span class="absolute flex h-2 w-2 hidden notification-indicator" {% if notices %} _="init remove .hidden from me" {% endif %}>
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-75"></span>
+                                        <span class="absolute inline-flex rounded-full h-2 w-2 bg-info"></span>
+                                    </span>
+                                    {% endif %}
+                                    <i class="bx bx-sm {% if page_title == tab.name %} bxs-{{ tab.icon }} {% else %} bx-{{ tab.icon }} {% endif %} {{ tab.name }}-link"></i>
+                                </div>
+                            </a>
+                            
+                            {% endfor %}
+                            <button class="block w-8 h-8 rounded-full outline-none p-0 flex" onclick="modal_compose2.showModal()"><i class="bx bx-edit-alt text-2xl text-base-content h-6 w-6"></i></button>
+                            {% include "posts/post_form_modal.html" with placeholder="What is happening?" modal_type="compose2" textarea_id="compose_post" media_id="media_post" %}
+                            <div class="dropdown dropdown-top dropdown-end">
+                                <div tabindex="0" role="button" class="bg-inherit border-none flex">
+                                    <img src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}" class="rounded-full w-8 h-8 max-xl:m-auto">
+                                </div>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu mb-3 p-2 shadow shadow-slate-500/50 bg-base-100 rounded-box w-52">
+                                    {% if request.user.is_superuser %}
+                                    <li><a class="dropdown-item flex justify-between" href="/admin/">Administration<i class="bx bx-shield text-lg"></i></a></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item flex justify-between" hx-get="{% url "profile" username=request.user.username %}" hx-push-url="true">Profile<i class="bx bx-user text-lg"></i></a></li>
+                                    <li><a class="dropdown-item flex justify-between" href="{% url "logout" %}">Log Out<i class="bx bx-log-out text-lg"></i></a></li>
+                                </ul>
+                            </div>                                
+                        </div>
+                    </nav>
+
+                    <main 
+                    id="content" 
+                    class="max-sm:basis-full"
+                    >
+                        <div id="notify"></div>
+                        <div class="content min-[690px]:w-[600px] min-h-screen border-slate-500 border-x-2 max-sm:border-none border-opacity-50 relative pb-52">
+                            {% block content %}{% endblock %}
+                        </div>
+                    </main>
+
+                    <section class="basis-1/3 text-center max-sm:hidden"></section>
+                    
+                </div>
+            
+            {% else %}
+            
+                <div class="h-screen flex max-sm:flex-col justify-evenly items-center">
+                    <img src="{% static "images/sizes/icon.png" %}" alt="dev" class="w-64 h-64 max-sm:w-32 max-sm:h-32">
+                
+                    <div id="join_content" class="join-form">
+                        {% block join_form %}{% endblock %}
+                    </div>
+                    
+                    <div hx-target="#join_content" class="flex flex-col gap-y-2">
+                        <h1 class="text-4xl">Join</h1>
+                        <a 
+                        class="btn btn-info w-full" 
+                        hx-get="{% url "signup" %}" 
+                        hx-push-url="true">
+                            Sign Up
+                        </a>
+                        <hr class="border-2 opacity-25 my-4 -z-1">
+                        <h5 class="text-lg">Already have an account?</h5>
+                        <a 
+                        class="btn btn-neutral w-full" 
+                        hx-get="{% url "login" %}" 
+                        hx-push-url="true">
+                            Login
+                        </a>
+                    </div>
+                </div>
+            
+            {% endif %}
+
+        </div>
+
+        <script>
+            window.addEventListener("htmx:beforeRequest", (e) => {
+                if (
+                    e.detail.requestConfig.verb === "get" && 
+                    window.location.pathname === e.detail.pathInfo.requestPath &&
+                    e.detail.elt.id !== "feed-update-btn"
+                ) {
+                    e.preventDefault();
+                }
+            })
+        </script>
+
+    </body>
+</html>

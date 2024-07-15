@@ -1,0 +1,47 @@
+{% extends base_template %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+
+    {% if first_page %}
+    <div class="flex items-center sticky z-[100] w-full backdrop-blur-md bg-base-100/80 border-slate-500 top-0" id="details-page">
+        <i
+        class='bx bx-arrow-back bx-sm ms-3 p-1 cursor-pointer rounded-full hover:bg-base-300'
+        _="on click js history.back() end"
+        ></i>
+        <h4 class="mx-5 my-2 text-xl">Post</h4>
+    </div>
+    <div class="post-detail border-slate-500 border-b-2 border-opacity-50 pt-0">
+        {% if post.is_reply %}
+            {% for parent_post in parent_posts %}
+                <article
+                class="parent-posts"
+                hx-target="#content" 
+                hx-swap="outerHTML" 
+                hx-get="{% url "post_detail" username=parent_post.user.username post_key=parent_post.post_key %}" 
+                hx-push-url="true"
+                >
+                    {% if forloop.first %}
+                        {% include "posts/post.html" with post=parent_post line="true" first="true" %}
+                    {% else %}
+                        {% include "posts/post.html" with post=parent_post line="true" %}
+                    {% endif %}
+                </article>
+            {% endfor %}
+            {% include "posts/post.html" with post=post current="true" %}
+        {% else %}
+            {% include "posts/post.html" with post=post current="true" parent="true" %}
+        {% endif %}
+    </div>
+    <section>
+        <div class="post-form border-slate-500 border-b-2 border-opacity-50 max-[689px]:hidden">
+            {% include "posts/post_form.html" with placeholder="Post your reply" reply="true" %}            
+        </div>
+    </section>
+    {% endif %}
+
+    {% include "core/includes/post_page.html" with comment_section="true" %}
+
+{% endblock content %}

@@ -1,0 +1,8 @@
+<div id="join_content">
+    {% block join_form %}{% endblock %}
+</div>
+{% if request.htmx %}
+<script>
+    document.title = "{{ page_title }} / DEV"
+</script>
+{% endif %}

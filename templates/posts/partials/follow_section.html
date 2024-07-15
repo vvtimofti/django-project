@@ -1,0 +1,23 @@
+<section id="follow" class="flex max-sm:flex-wrap justify-between items-center">
+    <div>
+        <span class="pe-2"><strong>{{ profile.get_follower_count }}</strong> Followers</span>
+        <span class="pe-2"><strong>{{ profile.get_following_count }}</strong> Following</span>
+    </div>
+    <div
+    class="rounded-full cursor-pointer w-fit"
+    hx-post="{% url "toggle_follow" username=username %}"
+    hx-swap="outerHTML"
+    hx-target="#follow"
+    hx-push-url="false"
+    >
+        {% if profile in request.user.profile.following.all %}
+            <button class="btn btn-sm btn-outline btn-info no-animation">
+                <i class="bx bxs-user-check bx-sm text-info" title="Following"></i>
+                Following
+            </button>
+        {% else %}
+            <button class="btn btn-sm btn-outline btn-info no-animation">Follow</button>
+        {% endif %}
+
+    </div>
+</section>

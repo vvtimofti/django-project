@@ -1,0 +1,250 @@
+{% load humanize %}
+{% load custom_filters %}
+
+<div class="post" {% if current %}id="target" _="init go to the top of the #target - 45"{% endif %}>
+    {% if post.repost_user %}
+        <div class="pt-1 ps-3">
+            <span class="opacity-50">
+                Reposted by 
+                <a 
+                    class="user-link hover:text-info"
+                    hx-get="{{ post.repost_user.profile.get_absolute_url }}"
+                    hx-push-url="true"
+                    hx-target="#content"
+                    hx-swap="outerHTML"
+                    hx-trigger="click consume"
+                >
+                    {{ post.repost_user.username }}
+                </a>
+
+            </span>
+        </div>
+    {% endif %}
+
+    {% if reply %}
+        <div class="pt-1 ps-3">
+            <span class="opacity-50">
+                Replied to
+                <a 
+                    class="user-link hover:text-info"
+                    hx-get="{{ post.parent_post.user.profile.get_absolute_url }}"
+                    hx-push-url="true"
+                    hx-target="#content"
+                    hx-swap="outerHTML"
+                    hx-trigger="click consume"
+                >
+                    {{ post.parent_post.user.username }}
+                </a>
+            </span>
+        </div>
+    {% endif %}
+
+
+    <div class="post-container">
+        <div id="screen" class="absolute h-screen"></div>
+
+        <div class="profile-pic flex flex-col {% if first or parent %}pt-[12px]{% endif %}">
+            {% if not parent %}
+                {% if not first and line or current %}
+                    <div class="h-3 border-l-2 border-l-base-content w-px mx-auto opacity-25"></div>
+                {% endif %}
+            {% endif %}
+            <div 
+            class="dropdown" 
+            _="
+            on mouseenter
+                add .entered
+                measure #screen height
+                measure my top
+                set distance to height - top
+                if distance < 200
+                    add .dropdown-top
+                end
+                wait 500ms if I match .entered 
+                    add .dropdown-hover
+                end
+            on mouseleave
+                remove .entered
+                remove .dropdown-hover
+                remove .dropdown-top
+            ">
+                <img 
+                src="{{ post.user.profile.profile_picture.url }}" 
+                alt="{{ post.user.username }}" 
+                class="rounded-full user-link w-12"
+                hx-get="{% url "profile" username=post.user.username %}"
+                hx-push-url="true"
+                hx-target="#content"
+                hx-swap="outerHTML"
+                hx-trigger="click consume"
+                tabindex="0" 
+                role="button" 
+                >
+                <div 
+                tabindex="0" 
+                class="dropdown-content z-[1] card card-compact w-64 p-2 bg-base-100 shadow shadow-slate-500/75 rounded-xl cursor-default" 
+                hx-trigger="click consume"
+                id="card_{{post.pk}}"
+                >
+                    <div class="card-body flex flex-col gap-y-4 ps-2">
+                        <div class="flex gap-4">
+                            <img 
+                            src="{{ post.user.profile.profile_picture.url }}" 
+                            alt="{{ post.user.username }}" 
+                            class="rounded-full user-link w-16 h-16"
+                            hx-get="{% url "profile" username=post.user.username %}"
+                            hx-push-url="true"
+                            hx-target="#content"
+                            hx-swap="outerHTML"
+                            >
+                            <div class="">
+                                <div 
+                                class="flex cursor-pointer w-fit"
+                                hx-get="{% url "profile" username=post.user.username %}"
+                                hx-push-url="true"
+                                hx-target="#content"
+                                hx-swap="outerHTML"
+                                hx-trigger="click consume"
+                                >
+                                    <b>{{ post.user.profile.display_name }}</b>
+                                </div>
+                                <a 
+                                class="user-link opacity-60 hover:text-info"
+                                hx-get="{% url "profile" username=post.user.username %}"
+                                hx-push-url="true"
+                                hx-target="#content"
+                                hx-swap="outerHTML"
+                                hx-trigger="click consume"
+                                >
+                                    @{{ post.user.username }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="">
+                                <span class="pe-2"><strong>{{ post.user.profile.get_follower_count }}</strong> Followers</span>
+                                <span class="pe-2"><strong>{{ post.user.profile.get_following_count }}</strong> Following</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if line %}
+                <div class="h-full border-l-2 border-l-base-content w-px mx-auto opacity-25"></div>
+            {% endif %}
+        </div>
+
+        <div class="w-full">
+        
+            <div class="post-content {% if line or current %}p-[12px]{% endif %}">
+            
+                <div class="post-info">
+                    <div class="user">
+                        <div 
+                        class="flex display-name"
+                        hx-get="{% url "profile" username=post.user.username %}"
+                        hx-push-url="true"
+                        hx-target="#content"
+                        hx-swap="outerHTML"
+                        hx-trigger="click consume"
+                        >
+                            <b>{{ post.user.profile.display_name }}</b>
+                        </div>
+                        <a 
+                        class="user-link opacity-60 hover:text-info"
+                        hx-get="{% url "profile" username=post.user.username %}"
+                        hx-push-url="true"
+                        hx-target="#content"
+                        hx-swap="outerHTML"
+                        hx-trigger="click consume"
+                        >
+                            @{{ post.user.username }}
+                        </a>
+                        <span class="opacity-60">{{ post.datetime|custom_naturaltime }}</span>
+                    </div>
+                    <div 
+                        class="more dropdown dropdown-left"
+                        hx-trigger="click consume"
+                    >
+                        <div tabindex="0" role="button" class=""><i class='bx bx-dots-horizontal bx-tool'></i></div>
+                        <ul tabindex="0" class="dropdown-content border-1 border-base-300 z-[1] menu p-2 shadow shadow-slate-500/75 bg-base-100 rounded-box w-52">
+                            {% if perms.main or post.user == request.user %}
+                            <li
+                            hx-delete="{% url "post_delete" username=post.user.username post_key=post.post_key %}"
+                            hx-target="#content"
+                            hx-trigger="click consume"
+                            hx-indicator="#spinnerDeletion"
+                            {% if current or line %}
+                                hx-push-url="true"
+                            {% else %}
+                                hx-push-url="false"
+                            {% endif %}
+                            >
+                                <div>
+                                    <i class='bx bx-trash-alt'></i>
+                                    <b>Delete post</b>
+                                    <span class="htmx-indicator loading loading-dots loading-xs p-0 m-0" id="spinnerDeletion"></span>
+                                </div>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="m-0 post-caption max-sm:text-sm">
+                    {{ post.post_content|linebreaks }}
+                </div>
+
+                {% if post.media %}
+                    {% if not post.is_video %}
+                        <div class="mt-4 rounded-xl">
+                            <img src="{{ post.media.url }}" alt="Post Media" class="rounded-xl object-contain max-h-[550px] hover:opacity-90 cursor-pointer" onclick="image_{{ post.post_key|cut:"-" }}.showModal()" hx-trigger="click consume" loading="lazy">
+                        </div>
+                        <dialog id="image_{{ post.post_key|cut:"-" }}" class="modal cursor-default flex" hx-trigger="click consume">
+                            <img src="{{ post.media.url }}" alt="Post Media" class="modal-box p-0 rounded-none max-w-5xl object-contain bg-base-300/0 m-auto shadow-none">
+                            <form method="dialog">
+                                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-0 focus:outline-none">✕</button>
+                            </form>
+                        </dialog>
+                    {% else %}
+                        <div class="mt-4 rounded-xl">
+                            <video class="rounded-xl" controls loading="lazy">
+                                <source src="{{ post.media.url }}" type="video/mp4">
+                            </video>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+            </div>
+
+            <div class="post-tools pt-0 ps-2 pb-2 pe-6 max-sm:ps-0 max-sm:pe-2 flex justify-between" hx-push-url="false">
+
+                {% include "posts/partials/like_section.html" with post=post %}
+
+                <div id="post_{{ post.post_key }}" title="Comment" hx-trigger="click consume" onclick="modal_{{ post.pk }}.showModal()">
+                    <i class='bx bx-comment bx-tool p-1 max-sm:p-0'></i>
+                    <label for="post_{{ post.post_key }}" class="align-text-bottom">
+                        {{ post.replies.count }}
+                    </label>
+                </div>
+
+                {% include "posts/post_form_modal.html" with placeholder="Post your reply" modal_type=post.pk reply="true" textarea_id=post.post_key media_id=post.post_key|cut:"-" %}
+
+                {% include "posts/partials/repost_section.html" with post=post %}
+                
+                <div title="Views" hx-trigger="click consume">
+                    <i class='bx bx-bar-chart bx-tool p-1 max-sm:p-0'></i>
+                    <label for="" class="align-text-bottom">
+                        {{ post.views_count }}
+                    </label>
+                </div>
+
+                {% include "posts/partials/bookmark_section.html" with post=post %}
+
+            </div>
+        
+        </div>
+
+    </div>
+
+</div>

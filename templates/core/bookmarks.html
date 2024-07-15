@@ -1,0 +1,15 @@
+{% extends base_template %}
+
+{% block title %}Bookmarks{% endblock title %}
+
+{% block content %}
+    {% if first_page %}
+    <h2 class="text-xl px-4 py-2 border-slate-500 border-b-2 border-opacity-50">Bookmarks</h2>
+    <script>
+        window.scrollTo({ top: 0, behavior: "instant" });
+    </script>
+    {% endif %}
+
+    {% include "core/includes/post_page.html" %}
+
+{% endblock content %}

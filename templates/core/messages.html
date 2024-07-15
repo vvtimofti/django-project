@@ -1,0 +1,74 @@
+{% extends base_template %}
+
+{% block title %}Messages{% endblock title %}
+
+{% block content %}
+    <div class="text-xl px-4 py-2 border-slate-500 border-b-2 border-opacity-50 flex items-center justify-between">
+        <span>Messages</span>
+    </div>
+    <div class="flex">
+        <dialog id="search_user" class="modal modal-bottom sm:modal-middle" _="init me.close()">
+        <div class="modal-box flex justify-between items-start">
+            <div class="flex flex-col">
+                <input 
+                type="search" 
+                name="search" 
+                hx-post="{% url "search" %}"
+                hx-trigger="input changed delay:500ms, search"
+                hx-target="#search-results"
+                class="input input-bordered focus:outline-none rounded-full" 
+                placeholder="Search a user..."
+                _="init set my value to ''">
+                <div 
+                id="search-results" 
+                class="flex flex-col" 
+                _="init remove my children"
+                ></div>
+            </div>
+            <div class="modal-action m-0">
+                <form method="dialog">
+                    <button class="btn btn-ghost btn-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>                              
+                    </button>
+                </form>
+            </div>
+        </div>
+        </dialog>
+    </div>
+
+    <div class="flex border-b-2 border-slate-500 border-opacity-50">
+
+        <div id="recents" class="h-[50vh] border-slate-500 border-r-2 border-opacity-50 w-[100px] overflow-y-auto">
+            <button class="p-2 flex m-auto rounded-full hover:bg-base-300" onclick="search_user.showModal()" title="Add new user">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>                  
+            </button>
+            {% for member in members %}
+                <div 
+                class="cursor-pointer"
+                hx-get="{% url "start_chat" username=member.username %}"
+                hx-target="#content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+                >
+                    <div class="flex justify-center items-center m-auto mx-4 py-2" title="@{{ member.username }}">
+                        <img src="{{ member.profile.profile_picture.url }}" alt="{{ member.username }}" class="w-10">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="basis-full">
+            {% block chat %}
+            <div class="w-full h-full flex justify-center items-center">
+                <span class="text-xl">Start a conversation</span>
+            </div>
+            {% endblock chat %}
+        </div>
+
+    </div>
+
+
+{% endblock content %}

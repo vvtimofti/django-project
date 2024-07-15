@@ -1,0 +1,150 @@
+{% load widget_tweaks %}
+
+
+<form 
+enctype="multipart/form-data"
+{% if reply %}
+hx-post="{% url "post_create" username=post.user.username post_key=post.post_key %}"
+{% else %}
+hx-post="{% url "post_create" %}"
+{% endif %}
+hx-target="#content"
+class="flex flex-col pb-2"
+hx-indicator="#spinner"
+>
+    {% render_field post_form.post_content placeholder=placeholder id="post_content" class="textarea bg-inherit" %}
+    <div>
+        <span>
+            <label 
+                for="id_media" id="setUpPreview" 
+                class="bx-tool rounded-full p-1 flex"
+                _="on click call setUpImagePreview()"
+            >
+                <i class="bx bx-image-alt m-auto"></i>
+            </label>
+        </span>
+        {% render_field post_form.media class="hidden" id="id_media" accept="image/*,video/*" %}
+        <button 
+        class="btn btn-sm btn-info px-3"
+        type="submit"
+        >
+            <span class="htmx-indicator hidden loading loading-spinner loading-xs" id="spinner"></span>
+            Post
+        </button>
+    </div>
+</form>
+
+<div id="image-preview" class="relative" _="init call clearForm() on mutation call mediaAdded()"></div>
+
+<script>
+    var formChanged = false;
+
+    function mediaAdded() {
+        formChanged = true;
+        window.addEventListener('htmx:beforeHistorySave', function(e) {
+            if (formChanged) {
+                clearForm();
+                formChanged = false;
+            }
+        });
+    }
+    
+    if (typeof isImagePreviewSetup === "undefined") {
+        let isImagePreviewSetup = false;
+    
+        function setUpImagePreview() {
+            console.log("set up image preview");
+    
+            if (isImagePreviewSetup) {
+                console.log("exit");
+                return;
+            }
+    
+            document
+                .getElementById("id_media")
+                .addEventListener("change", function (event) {
+                    console.log("preview");
+                    var previewContainer =
+                        document.getElementById("image-preview");
+                    var fileMedia = document.getElementById("id_media");
+                    var fileInput = event.target;
+                    var files = fileInput.files;
+    
+                    previewContainer.innerHTML = "";
+    
+                    if (!(files[0].type.startsWith("image/") || files[0].type.startsWith("video/"))) {
+                        if (files.length === 0) return;
+    
+                        previewContainer.innerHTML = `<p class='text-red-500'><i class="bx bx-block text-red-500"></i> ${
+                            files[0].name.split(".")[files[0].name.split(".").length - 1]
+                        } extension is not allowed</p>`;
+                        fileMedia.value = "";
+    
+                        setTimeout(function () {
+                            var errorMessage = previewContainer.firstChild;
+    
+                            if (errorMessage) {
+                                errorMessage.style.transition = "opacity 0.5s";
+                                errorMessage.style.opacity = "0";
+    
+                                setTimeout(function () {
+                                    previewContainer.innerHTML = "";
+                                }, 500);
+                            }
+                        }, 3000);
+                        return;
+                    }
+    
+                    let reader = new FileReader();
+    
+                    reader.onload = function (e) {
+                        var closeContainer = document.createElement("div");
+                        closeContainer.classList.add(
+                            "rounded-full",
+                            "size-6",
+                            "bg-base-300/75",
+                            "absolute",
+                            "top-1.5",
+                            "right-1.5",
+                            "cursor-pointer",
+                        );
+                        var mediaElement;
+                        if (files[0].type.startsWith("video/")) {
+                            mediaElement = document.createElement("video");
+                            mediaElement.classList.add("rounded-xl", "mb-4");
+                            mediaElement.src = e.target.result;
+                            mediaElement.controls = "true";
+                        } else {
+                            mediaElement = document.createElement("img");
+                            mediaElement.src = e.target.result;
+                        }
+    
+                        var closeBtnElement = document.createElement("i");
+                        closeBtnElement.classList.add(
+                            "bx",
+                            "bx-x",
+                            "p-1",
+                            "bg-transparent",
+                            "rounded-full",
+                            "hover:bg-base-300/95",
+                        );
+                        closeBtnElement.id = "image-preview-close";
+    
+                        closeContainer.appendChild(closeBtnElement);
+                        previewContainer.appendChild(closeContainer);
+                        previewContainer.appendChild(mediaElement);
+    
+                        document
+                            .getElementById("image-preview-close")
+                            .addEventListener("click", function () {
+                                console.log("close");
+                                clearPreviewContainer();
+                            });
+                    };
+    
+                    reader.readAsDataURL(files[0]);
+                });
+            isImagePreviewSetup = true;
+        }
+    }
+</script>

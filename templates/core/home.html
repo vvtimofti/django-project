@@ -1,0 +1,44 @@
+{% extends base_template %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+
+    {% if first_page %}
+    <div 
+        role="tablist"
+        class="tabs tabs-bordered pt-2 shrink" 
+        hx-target="#content"
+        hx-push-url="true"
+        hx-swap="outerHTML">
+        <a 
+            role="tab" class="tab text-base {% if "following" not in request.path %}tab-active{% endif %}"
+            hx-get="{% url "home" %}">
+            For you
+        </a>
+        <a 
+            role="tab" class="tab text-base {% if "following" in request.path %}tab-active{% endif %}" 
+            hx-get="{% url "following" %}">
+            Following
+        </a>
+    </div>
+
+    <div class="home-section" id="home-page">
+        <div class="post-form border-slate-500 border-b-2 border-opacity-50 max-sm:hidden">
+            {% include "posts/post_form.html" with placeholder="What is happening?" %}
+        </div>
+    </div>
+    <div id="feed-update"></div>   
+    <script>
+        if (document.getElementById("home-page")) {
+            window.scrollTo({ top: 0, behavior: "instant" });
+        }
+    </script>
+    {% endif %}
+
+    {% block home_content %}
+        {% include "core/includes/post_page.html" %}
+    {% endblock home_content %}
+
+{% endblock content %}

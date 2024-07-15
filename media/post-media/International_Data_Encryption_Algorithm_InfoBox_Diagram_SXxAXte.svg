@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" height="660" width="632" version="1.0">
+ <style type="text/css">
+ .op {
+  stroke-linecap: square;
+  stroke-width: 3;
+  fill: #fff;
+ }
+ .capped {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5;
+  marker-end: url(#cap);
+ }
+ </style>
+ <defs>
+  <g id="xor" class="op" stroke="#00f">
+   <circle cx="21" cy="21" r="21"/>
+   <path d="M21 1v40 M1 21h40"/>
+  </g>
+  <g class="op" id="mult" stroke="red">
+   <circle cx="21" cy="21" r="21"/>
+   <circle cx="21" cy="21" r="7" fill="#f00"/>
+  </g>
+  <path id="plus" class="op" stroke="#0f0" d="M0 0 h42 v42 h-42zM21 1v40M1 21h40"/>
+  <marker id="cap" orient="auto" markerWidth="40" markerHeight="30" refY="5">
+   <path style="stroke:none;fill:#000;" d="M0 0 v10 l9 -5 z"/>
+  </marker>
+ </defs>
+
+ <g class="capped">
+  <path d="m100 1v65"/>
+  <path d="m180 1v65"/>
+  <path d="m33 101h32"/>
+  <path d="m247 101h-32"/>
+  <path d="m450 1v65"/>
+  <path d="m530 1v65"/>
+  <path d="m383 101h32"/>
+  <path d="m597 101h-32"/>
+  <path d="m100 122v324"/>
+  <path d="m180 122v385"/>
+  <path d="m450 122v324"/>
+  <path d="m530 122v385"/>
+  <path d="m100 155h113"/>
+  <path d="m450 155h-167"/>
+  <path d="m180 210h167"/>
+  <path d="m530 210h-113"/>
+  <path d="m248 176v74"/>
+  <path d="m157 285h56"/>
+  <path d="m269 285h78"/>
+  <path d="m248 306v79"/>
+  <path d="m382 306v79"/>
+  <path d="m474 420h-56"/>
+  <path d="m361 420h-78"/>
+  <path d="m248 442v100h-33"/>
+  <path d="m248 542h247"/>
+  <path d="m382 231v19"/>
+  <path d="m382 441v40 h33"/>
+  <path d="m382 481h-247"/>
+  <path d="m100 502v142"/>
+  <path d="m530 563v81"/>
+  <path d="m180 563v17l270 34v30"/>
+  <path d="m450 502v78l-270 34v30"/>
+ </g>
+
+ <use xlink:href="#mult" x="79" y="80"/>
+ <use xlink:href="#mult" x="227" y="264"/>
+ <use xlink:href="#mult" x="361" y="399"/>
+ <use xlink:href="#mult" x="509" y="80"/>
+ <use xlink:href="#plus" x="159" y="80"/>
+ <use xlink:href="#plus" x="227" y="399"/>
+ <use xlink:href="#plus" x="361" y="264"/>
+ <use xlink:href="#plus" x="429" y="80"/>
+ <use xlink:href="#xor" x="79" y="460"/>
+ <use xlink:href="#xor" x="159" y="521"/>
+ <use xlink:href="#xor" x="227" y="134"/>
+ <use xlink:href="#xor" x="361" y="189"/>
+ <use xlink:href="#xor" x="429" y="460"/>
+ <use xlink:href="#xor" x="509" y="521"/>
+
+ <text font-size="22px" font-family="Arial" fill="#000">
+  <tspan x="1" y="109">K1</tspan>
+  <tspan x="254" y="109">K2</tspan>
+  <tspan x="350" y="109">K3</tspan>
+  <tspan x="604" y="109">K4</tspan>
+  <tspan x="123" y="293">K5</tspan>
+  <tspan x="481" y="428">K6</tspan>
+ </text>
+</svg>

@@ -1,0 +1,80 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Profile{% endblock title %}
+
+{% block content %}
+    {% if first_page %}
+    <div class="p-3 flex-fol">
+        <div class="flex">
+
+            <div class="min-w-16">
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="rounded-full w-16 h-16">
+            </div>
+            <div class="ps-4 flex flex-col w-full">
+                <strong class="text-2xl">{{ user.profile.display_name }}</strong>
+                {% if request.user != user %}
+                    {% include "posts/partials/follow_section.html" with username=user.username profile=user.profile %}
+                    <a 
+                    class="btn btn-sm btn-outline btn-error w-fit ms-auto me-0 mt-2 no-animation"
+                    hx-get="{% url "start_chat" username=user.username %}"
+                    hx-target="#content"
+                    hx-swap="outerHTML"
+                    hx-push-url="true"
+                    >Chat</a>
+                {% else %}
+                    <div>
+                        <span class="pe-2"><strong>{{ user.profile.get_follower_count }}</strong> Followers</span>
+                        <span class="pe-2"><strong>{{ user.profile.get_following_count }}</strong> Following</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.profile.bio %}
+        <blockquote>
+            <p class="text-sm my-6 ms-2 me-8 border-t-2 border-slate-500 border-opacity-50 bio">{{ user.profile.bio }}</p>
+        </blockquote>
+        {% endif %}
+
+    </div>
+
+    <div 
+        role="tablist"
+        class="tabs tabs-bordered" 
+        hx-target="#content"
+        hx-push-url="true"
+        hx-swap="outerHTML">
+        <a 
+            role="tab" class="tab text-base {% if "posts" in request.path %}tab-active font-bold{% endif %}" 
+            hx-get="{% url "profile" username=user.username %}">
+            Posts
+        </a>
+        <a 
+            role="tab" class="tab text-base {% if "replies" in request.path %}tab-active font-bold{% endif %}" 
+            hx-get="{% url "profile_replies" username=user.username %}">
+            Replies
+        </a>
+        <a 
+        role="tab" class="tab text-base {% if "likes" in request.path %}tab-active font-bold{% endif %}" 
+        hx-get="{% url "profile_likes" username=user.username %}">
+            Liked
+        </a>
+        {% if user == request.user %}
+        <a 
+        role="tab" class="tab text-base {% if "settings" in request.path %}tab-active font-bold{% endif %}" 
+        hx-get="{% url "profile_settings" username=user.username %}">
+            Settings
+        </a>
+        {% endif %}
+    </div>
+    <script>
+        window.scrollTo({ top: 0, behavior: "instant" });
+    </script>
+    {% endif %}
+
+    {% block profile_content %}
+        {% include "core/includes/post_page.html" %}
+    {% endblock profile_content %}
+    
+{% endblock content %}
