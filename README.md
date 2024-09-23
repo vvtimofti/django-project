@@ -3,9 +3,6 @@
 ## Instant validation
 ![instant_validation2](https://github.com/user-attachments/assets/354013be-11b2-411f-9bef-211ea6bf89c9)
 
-## Infinite scroll
-![infinite_scroll](https://github.com/user-attachments/assets/3d7069a1-8dd2-4d90-8af8-bca32bc016d7)
-
 ## Profile personalization
 ![profile2](https://github.com/user-attachments/assets/41954700-f189-4e6b-9e55-17ec60dac055)
 
