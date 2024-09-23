@@ -6,9 +6,6 @@
 ## Profile personalization
 ![profile2](https://github.com/user-attachments/assets/41954700-f189-4e6b-9e55-17ec60dac055)
 
-## Responsive
-![responsiveness](https://github.com/user-attachments/assets/2f761654-5947-4763-a7b4-fe7070220337)
-
 ## Notifications
 ![replying](https://github.com/user-attachments/assets/2336b460-df8b-4403-ba46-14facf065ac3)
 
